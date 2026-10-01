@@ -1,5 +1,6 @@
 package com.gestion.credito.controller;
 
+import com.gestion.credito.dto.CambiarEstadoRequest;
 import com.gestion.credito.dto.CrearSolicitudRequest;
 import com.gestion.credito.dto.SolicitudResponse;
 import com.gestion.credito.model.EstadoSolicitud;
@@ -39,5 +40,14 @@ public class SolicitudCreditoController {
     ) {
         List<SolicitudResponse> lista = service.listar(estado);
         return ResponseEntity.ok(lista);
+    }
+
+    @PatchMapping("/{id}/estado")
+    public ResponseEntity<SolicitudResponse> cambiarEstado(
+            @PathVariable Long id,
+            @Valid @RequestBody CambiarEstadoRequest request
+    ) {
+        SolicitudResponse actualizada = service.cambiarEstado(id, request);
+        return ResponseEntity.ok(actualizada);
     }
 }
