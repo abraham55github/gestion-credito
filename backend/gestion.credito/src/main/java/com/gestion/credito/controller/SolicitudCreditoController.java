@@ -2,14 +2,14 @@ package com.gestion.credito.controller;
 
 import com.gestion.credito.dto.CrearSolicitudRequest;
 import com.gestion.credito.dto.SolicitudResponse;
+import com.gestion.credito.model.EstadoSolicitud;
 import com.gestion.credito.service.SolicitudCreditoService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/solicitudes")
@@ -31,5 +31,13 @@ public class SolicitudCreditoController {
         return ResponseEntity
                 .created(uriBuilder.path("/solicitudes/{id}").build(creada.id()))
                 .body(creada);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<SolicitudResponse>> listar(
+            @RequestParam(required = false) EstadoSolicitud estado
+    ) {
+        List<SolicitudResponse> lista = service.listar(estado);
+        return ResponseEntity.ok(lista);
     }
 }
