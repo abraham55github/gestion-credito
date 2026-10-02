@@ -1,48 +1,31 @@
 import { Component, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { SolicitudesStore } from '../../services/solicitudes-store';
 import { ErrorResponse } from '../../models/error-response';
+import { CrearSolicitudRequest } from '../../models/crear-solicitud-request';
+import { NuevaSolicitudForm } from '../../components/nueva-solicitud-form/nueva-solicitud-form';
 
 @Component({
   selector: 'nuevas-solicitudes-page',
-  imports: [ReactiveFormsModule],
+  imports: [NuevaSolicitudForm],
   templateUrl: './nuevas-solicitudes-page.html'
 })
 export default class NuevasSolicitudesPage {
-  private readonly formBuilder = inject(FormBuilder);
   private readonly store = inject(SolicitudesStore);
 
-  readonly solicitudForm = this.formBuilder.nonNullable.group({
-    cedula: ['', [Validators.required]],
-    monto: [null as number | null, [Validators.required, Validators.min(500), Validators.max(50000)]],
-    plazoMeses: [null as number | null, [Validators.required, Validators.min(6), Validators.max(60)]],
-  });
-
-  readonly enviado = signal(false);
   readonly guardando = signal(false);
   readonly errorMensaje = signal('');
   readonly exito = signal(false);
 
-  onSubmit(): void {
-    this.enviado.set(true);
+  crear(request: CrearSolicitudRequest): void {
+    this.guardando.set(true);
     this.errorMensaje.set('');
     this.exito.set(false);
 
-    if (this.solicitudForm.invalid) {
-      this.solicitudForm.markAllAsTouched();
-      return;
-    }
-
-    this.guardando.set(true);
-    const { cedula, monto, plazoMeses } = this.solicitudForm.getRawValue();
-    // monto y plazoMeses no pueden ser null acá: Validators.required ya lo garantizó arriba.
-    this.store.crear({ cedula, monto: monto!, plazoMeses: plazoMeses! }).subscribe({
+    this.store.crear(request).subscribe({
       next: () => {
         this.guardando.set(false);
         this.exito.set(true);
-        this.enviado.set(false);
-        this.solicitudForm.reset();
       },
       error: (error: HttpErrorResponse) => {
         this.guardando.set(false);
