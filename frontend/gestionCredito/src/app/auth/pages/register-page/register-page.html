@@ -1,0 +1,105 @@
+<app-auth-card titulo="Crear cuenta" subtitulo="Regístrate para gestionar solicitudes de crédito">
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label for="nombre" class="block text-sm font-semibold text-slate-700">Nombre</label>
+                <input
+                    id="nombre" type="text" formControlName="nombre" placeholder="Juan"
+                    class="mt-1 h-11 w-full rounded-lg border border-slate-300 px-3 text-sm text-slate-800 outline-none focus:border-blue-500"
+                />
+                @if (registerForm.controls.nombre.invalid && (registerForm.controls.nombre.touched || enviado())) {
+                    <p class="mt-1 text-xs font-semibold text-rose-600">El nombre es obligatorio.</p>
+                }
+            </div>
+
+            <div>
+                <label for="apellido" class="block text-sm font-semibold text-slate-700">Apellido</label>
+                <input
+                    id="apellido" type="text" formControlName="apellido" placeholder="Pérez"
+                    class="mt-1 h-11 w-full rounded-lg border border-slate-300 px-3 text-sm text-slate-800 outline-none focus:border-blue-500"
+                />
+                @if (registerForm.controls.apellido.invalid && (registerForm.controls.apellido.touched || enviado())) {
+                    <p class="mt-1 text-xs font-semibold text-rose-600">El apellido es obligatorio.</p>
+                }
+            </div>
+        </div>
+
+        <div>
+            <label for="correo" class="block text-sm font-semibold text-slate-700">Correo</label>
+            <input
+                id="correo" type="email" formControlName="correo" placeholder="juan@correo.com"
+                class="mt-1 h-11 w-full rounded-lg border border-slate-300 px-3 text-sm text-slate-800 outline-none focus:border-blue-500"
+            />
+            @if (registerForm.controls.correo.invalid && (registerForm.controls.correo.touched || enviado())) {
+                <p class="mt-1 text-xs font-semibold text-rose-600">
+                    @if (registerForm.controls.correo.errors?.['required']) {
+                        El correo es obligatorio.
+                    } @else {
+                        Ingresa un correo válido.
+                    }
+                </p>
+            }
+        </div>
+
+        <div>
+            <label for="cedula" class="block text-sm font-semibold text-slate-700">Número de cédula</label>
+            <input
+                id="cedula" type="text" formControlName="cedula" placeholder="1023456789"
+                class="mt-1 h-11 w-full rounded-lg border border-slate-300 px-3 text-sm text-slate-800 outline-none focus:border-blue-500"
+            />
+            @if (registerForm.controls.cedula.invalid && (registerForm.controls.cedula.touched || enviado())) {
+                <p class="mt-1 text-xs font-semibold text-rose-600">La cédula es obligatoria.</p>
+            }
+        </div>
+
+        <div>
+            <label for="password" class="block text-sm font-semibold text-slate-700">Contraseña</label>
+            <input
+                id="password" type="password" formControlName="password" placeholder="Mínimo 6 caracteres"
+                class="mt-1 h-11 w-full rounded-lg border border-slate-300 px-3 text-sm text-slate-800 outline-none focus:border-blue-500"
+            />
+            @if (registerForm.controls.password.invalid && (registerForm.controls.password.touched || enviado())) {
+                <p class="mt-1 text-xs font-semibold text-rose-600">
+                    @if (registerForm.controls.password.errors?.['required']) {
+                        La contraseña es obligatoria.
+                    } @else {
+                        Debe tener al menos 6 caracteres.
+                    }
+                </p>
+            }
+        </div>
+
+        <div>
+            <label for="confirmPassword" class="block text-sm font-semibold text-slate-700">Confirmar contraseña</label>
+            <input
+                id="confirmPassword" type="password" formControlName="confirmPassword" placeholder="Repite la contraseña"
+                class="mt-1 h-11 w-full rounded-lg border border-slate-300 px-3 text-sm text-slate-800 outline-none focus:border-blue-500"
+            />
+            @if (registerForm.controls.confirmPassword.touched || enviado()) {
+                @if (registerForm.controls.confirmPassword.errors?.['required']) {
+                    <p class="mt-1 text-xs font-semibold text-rose-600">Confirma la contraseña.</p>
+                } @else if (registerForm.errors?.['contrasenasDistintas']) {
+                    <p class="mt-1 text-xs font-semibold text-rose-600">Las contraseñas no coinciden.</p>
+                }
+            }
+        </div>
+
+        @if (errorMensaje()) {
+            <p class="rounded-lg bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">{{ errorMensaje() }}</p>
+        }
+
+        <button
+            type="submit"
+            [disabled]="guardando()"
+            class="mt-2 h-11 rounded-lg bg-blue-600 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+            {{ guardando() ? 'Creando cuenta...' : 'Crear cuenta' }}
+        </button>
+
+        <p class="text-center text-xs text-slate-500">
+            ¿Ya tenés cuenta?
+            <a routerLink="/login" class="font-semibold text-blue-600 hover:underline">Inicia sesión</a>
+        </p>
+    </form>
+</app-auth-card>

@@ -1,5 +1,7 @@
-import {  Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { environment } from '@environments/environment';
+import { SessionService } from '../../../../auth/services/session.service';
 
 @Component({
   selector: 'credit-side-menu-header',
@@ -7,6 +9,13 @@ import { environment } from '@environments/environment';
   templateUrl: './credit-side-menu-header.html'
 })
 export class CreditSideMenuHeader {
-  envs = environment
+  private readonly session = inject(SessionService);
+  private readonly router = inject(Router);
 
+  envs = environment;
+
+  cerrarSesion(): void {
+    this.session.cerrarSesion();
+    this.router.navigateByUrl('/login');
+  }
 }

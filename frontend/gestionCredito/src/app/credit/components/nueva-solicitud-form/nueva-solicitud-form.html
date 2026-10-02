@@ -1,0 +1,62 @@
+<form [formGroup]="solicitudForm" (ngSubmit)="onSubmit()" class="mt-6 flex flex-col gap-5">
+
+        <div>
+            <label for="cedula" class="block text-sm font-semibold text-slate-700">Cédula</label>
+            <input id="cedula" type="text" formControlName="cedula" placeholder="Ej. 1023456789"
+                class="mt-1 h-11 w-full rounded-lg border border-slate-300 px-3 text-sm text-slate-800 outline-none focus:border-blue-500" />
+            @if (solicitudForm.controls.cedula.invalid && (solicitudForm.controls.cedula.touched || enviado())) {
+            <p class="mt-1 text-xs font-semibold text-rose-600">La cédula es obligatoria.</p>
+            }
+        </div>
+
+        <div>
+            <label for="monto" class="block text-sm font-semibold text-slate-700">
+                Monto
+                <span class="font-normal text-slate-400">($500 — $50.000)</span>
+            </label>
+            <input id="monto" type="number" formControlName="monto" placeholder="0"
+                class="mt-1 h-11 w-full rounded-lg border border-slate-300 px-3 text-sm text-slate-800 outline-none focus:border-blue-500" />
+            @if (solicitudForm.controls.monto.invalid && (solicitudForm.controls.monto.touched || enviado())) {
+            <p class="mt-1 text-xs font-semibold text-rose-600">
+                @if (solicitudForm.controls.monto.errors?.['required']) {
+                El monto es obligatorio.
+                } @else {
+                El monto debe estar entre $500 y $50.000.
+                }
+            </p>
+            }
+        </div>
+
+        <div>
+            <label for="plazoMeses" class="block text-sm font-semibold text-slate-700">
+                Plazo
+                <span class="font-normal text-slate-400">(6 — 60 meses)</span>
+            </label>
+            <input id="plazoMeses" type="number" formControlName="plazoMeses" placeholder="Ej. 24"
+                class="mt-1 h-11 w-full rounded-lg border border-slate-300 px-3 text-sm text-slate-800 outline-none focus:border-blue-500" />
+            @if (solicitudForm.controls.plazoMeses.invalid && (solicitudForm.controls.plazoMeses.touched || enviado()))
+            {
+            <p class="mt-1 text-xs font-semibold text-rose-600">
+                @if (solicitudForm.controls.plazoMeses.errors?.['required']) {
+                El plazo es obligatorio.
+                } @else {
+                El plazo debe estar entre 6 y 60 meses.
+                }
+            </p>
+            }
+        </div>
+
+        @if (errorMensaje()) {
+        <p class="rounded-lg bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">{{ errorMensaje() }}</p>
+        }
+        @if (exito()) {
+        <p class="rounded-lg bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">
+            Solicitud creada correctamente.
+        </p>
+        }
+
+        <button type="submit" [disabled]="guardando()"
+            class="mt-2 h-11 rounded-lg bg-blue-600 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50">
+            {{ guardando() ? 'Creando...' : 'Crear solicitud' }}
+        </button>
+    </form>

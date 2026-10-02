@@ -1,16 +1,16 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { Component, input, output } from '@angular/core';
 import { SolicitudResponse } from '../../models/solicitud-response';
+import { SolicitudCardHeader } from './solicitud-card-header/solicitud-card-header';
+import { SolicitudCardInfo } from './solicitud-card-info/solicitud-card-info';
+import { CambioEstadoEvento, SolicitudCardState } from './solicitud-card-state/solicitud-card-state';
 
 @Component({
-  selector: 'app-solicitud-card',
-  imports: [CurrencyPipe, DatePipe],
-  templateUrl: './solicitud-card.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'solicitud-card',
+  imports: [SolicitudCardHeader, SolicitudCardInfo, SolicitudCardState],
+  templateUrl: './solicitud-card.html'
 })
 export class SolicitudCard {
   readonly solicitud = input.required<SolicitudResponse>();
 
-  readonly aprobar = output<SolicitudResponse>();
-  readonly rechazar = output<SolicitudResponse>();
+  readonly cambiarEstado = output<CambioEstadoEvento>();
 }

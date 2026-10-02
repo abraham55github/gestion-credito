@@ -1,47 +1,35 @@
-import { Component, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { SolicitudCreditoService } from '../../services/solicitud-credito.service';
+import { Component, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { SolicitudesStore } from '../../services/solicitudes-store';
+import { extraerMensajeError } from '../../../shared/utils/extraer-mensaje-error';
+import { CrearSolicitudRequest } from '../../models/crear-solicitud-request';
+import { NuevaSolicitudForm } from '../../components/nueva-solicitud-form/nueva-solicitud-form';
 
 @Component({
   selector: 'nuevas-solicitudes-page',
-  imports: [ReactiveFormsModule],
+  imports: [NuevaSolicitudForm],
   templateUrl: './nuevas-solicitudes-page.html'
 })
 export default class NuevasSolicitudesPage {
-  private readonly formBuilder = inject(FormBuilder);
-  private readonly solicitudCreditoService = inject(SolicitudCreditoService);
+  private readonly store = inject(SolicitudesStore);
 
-  readonly solicitudForm = this.formBuilder.nonNullable.group({
-    cedula: ['', [Validators.required]],
-    monto: [null as number | null, [Validators.required]],
-    plazoMeses: [null as number | null, [Validators.required]],
-  });
+  readonly guardando = signal(false);
+  readonly errorMensaje = signal('');
+  readonly exito = signal(false);
 
-  guardando = false;
-  errorMensaje = '';
-  exito = false;
+  crear(request: CrearSolicitudRequest): void {
+    this.guardando.set(true);
+    this.errorMensaje.set('');
+    this.exito.set(false);
 
-  onSubmit(): void {
-    if (this.solicitudForm.invalid) {
-      this.solicitudForm.markAllAsTouched();
-      return;
-    }
-
-    const { cedula, monto, plazoMeses } = this.solicitudForm.getRawValue();
-
-    this.guardando = true;
-    this.errorMensaje = '';
-    this.exito = false;
-
-    this.solicitudCreditoService.crear({ cedula, monto: monto!, plazoMeses: plazoMeses! }).subscribe({
+    this.store.crear(request).subscribe({
       next: () => {
-        this.guardando = false;
-        this.exito = true;
-        this.solicitudForm.reset();
+        this.guardando.set(false);
+        this.exito.set(true);
       },
-      error: () => {
-        this.guardando = false;
-        this.errorMensaje = 'No se pudo crear la solicitud. Intenta nuevamente.';
+      error: (error: HttpErrorResponse) => {
+        this.guardando.set(false);
+        this.errorMensaje.set(extraerMensajeError(error, 'No se pudo crear la solicitud. Intenta nuevamente.'));
       },
     });
   }
