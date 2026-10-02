@@ -1,7 +1,7 @@
 package com.gestion.credito.dto;
 
 import com.gestion.credito.model.EstadoSolicitud;
-import com.gestion.credito.model.SolicitudCredito;
+import com.gestion.credito.model.SolicitudCreditoEntity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -17,7 +17,7 @@ public record SolicitudResponse(
         LocalDateTime fechaActualizacion
 ) {
 
-    public static SolicitudResponse desde(SolicitudCredito solicitud) {
+    public static SolicitudResponse desde(SolicitudCreditoEntity solicitud) {
         return new SolicitudResponse(
                 solicitud.getId(),
                 solicitud.getCedula(),

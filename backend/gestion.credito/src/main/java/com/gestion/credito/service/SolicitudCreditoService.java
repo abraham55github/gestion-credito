@@ -6,7 +6,7 @@ import com.gestion.credito.dto.SolicitudResponse;
 import com.gestion.credito.exception.SolicitudNotFoundException;
 import com.gestion.credito.exception.TransicionEstadoInvalidaException;
 import com.gestion.credito.model.EstadoSolicitud;
-import com.gestion.credito.model.SolicitudCredito;
+import com.gestion.credito.model.SolicitudCreditoEntity;
 import com.gestion.credito.repository.SolicitudCreditoRepository;
 import org.springframework.stereotype.Service;
 
@@ -22,24 +22,24 @@ public class SolicitudCreditoService {
     }
 
     public SolicitudResponse crear(CrearSolicitudRequest request) {
-        SolicitudCredito solicitud = new SolicitudCredito(
+        SolicitudCreditoEntity solicitud = new SolicitudCreditoEntity(
                 request.cedula(),
                 request.monto(),
                 request.plazoMeses()
         );
 
-        SolicitudCredito guardada = repository.save(solicitud);
+        SolicitudCreditoEntity guardada = repository.save(solicitud);
         return SolicitudResponse.desde(guardada);
     }
 
     public List<SolicitudResponse> listar(EstadoSolicitud estado) {
-        List<SolicitudCredito> lista = estado == null ? repository.findAll() : repository.findByEstadoSolicitud(estado);
+        List<SolicitudCreditoEntity> lista = estado == null ? repository.findAll() : repository.findByEstadoSolicitud(estado);
 
         return lista.stream().map(SolicitudResponse::desde).toList();
     }
 
     public SolicitudResponse cambiarEstado(Long id, CambiarEstadoRequest request) {
-        SolicitudCredito solicitud = repository.findById(id)
+        SolicitudCreditoEntity solicitud = repository.findById(id)
                 .orElseThrow(() -> new SolicitudNotFoundException(id));
 
         if (solicitud.getEstadoSolicitud() != EstadoSolicitud.PENDIENTE) {

@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "solicitud_credito")
-public class SolicitudCredito {
+public class SolicitudCreditoEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,10 +34,10 @@ public class SolicitudCredito {
     @Column
     private LocalDateTime fechaActualizacion;
 
-    protected SolicitudCredito() {
+    protected SolicitudCreditoEntity() {
     }
 
-    public SolicitudCredito(String cedula, BigDecimal monto, Integer plazoMeses) {
+    public SolicitudCreditoEntity(String cedula, BigDecimal monto, Integer plazoMeses) {
         this.cedula = cedula;
         this.monto = monto;
         this.plazoMeses = plazoMeses;

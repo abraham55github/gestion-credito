@@ -6,7 +6,7 @@ import com.gestion.credito.dto.SolicitudResponse;
 import com.gestion.credito.exception.SolicitudNotFoundException;
 import com.gestion.credito.exception.TransicionEstadoInvalidaException;
 import com.gestion.credito.model.EstadoSolicitud;
-import com.gestion.credito.model.SolicitudCredito;
+import com.gestion.credito.model.SolicitudCreditoEntity;
 import com.gestion.credito.repository.SolicitudCreditoRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class SolicitudCreditoServiceTest {
+class SolicitudCreditoEntityServiceTest {
 
     @Mock
     private SolicitudCreditoRepository repository;
@@ -33,7 +33,7 @@ class SolicitudCreditoServiceTest {
 
     @Test
     void crear_nuevaSolicitud_naceEnEstadoPendiente() {
-        when(repository.save(any(SolicitudCredito.class))).thenAnswer(invocacion -> invocacion.getArgument(0));
+        when(repository.save(any(SolicitudCreditoEntity.class))).thenAnswer(invocacion -> invocacion.getArgument(0));
 
         SolicitudResponse respuesta = service.crear(new CrearSolicitudRequest("123456789", new BigDecimal("1000"), 12));
 
@@ -43,9 +43,9 @@ class SolicitudCreditoServiceTest {
 
     @Test
     void cambiarEstado_solicitudPendiente_seAprueba() {
-        SolicitudCredito solicitud = new SolicitudCredito("123456789", new BigDecimal("1000"), 12);
+        SolicitudCreditoEntity solicitud = new SolicitudCreditoEntity("123456789", new BigDecimal("1000"), 12);
         when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
-        when(repository.save(any(SolicitudCredito.class))).thenAnswer(invocacion -> invocacion.getArgument(0));
+        when(repository.save(any(SolicitudCreditoEntity.class))).thenAnswer(invocacion -> invocacion.getArgument(0));
 
         SolicitudResponse respuesta = service.cambiarEstado(
                 1L, new CambiarEstadoRequest(EstadoSolicitud.APROBADA, "Cliente cumple requisitos"));
@@ -56,7 +56,7 @@ class SolicitudCreditoServiceTest {
 
     @Test
     void cambiarEstado_solicitudYaResuelta_lanzaTransicionInvalida() {
-        SolicitudCredito solicitud = new SolicitudCredito("123456789", new BigDecimal("1000"), 12);
+        SolicitudCreditoEntity solicitud = new SolicitudCreditoEntity("123456789", new BigDecimal("1000"), 12);
         solicitud.cambiarEstado(EstadoSolicitud.APROBADA, "Primer comentario");
         when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
 
