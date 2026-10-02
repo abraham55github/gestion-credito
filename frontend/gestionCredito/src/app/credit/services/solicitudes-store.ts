@@ -2,9 +2,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { CrearSolicitudRequest } from '../models/crear-solicitud-request';
-import { ErrorResponse } from '../models/error-response';
 import { EstadoSolicitud } from '../models/estado-solicitud';
 import { SolicitudResponse } from '../models/solicitud-response';
+import { extraerMensajeError } from '../../shared/utils/extraer-mensaje-error';
 import { SolicitudCreditoService } from './solicitud-credito.service';
 
 export type FiltroEstado = EstadoSolicitud | 'TODAS';
@@ -55,7 +55,7 @@ export class SolicitudesStore {
     this.solicitudCreditoService.cambiarEstado(solicitud.id, { estado, comentario }).subscribe({
       next: (actualizada) => this.actualizarEnCache(actualizada),
       error: (error: HttpErrorResponse) => {
-        this.errorMensaje.set(this.extraerMensaje(error, 'No se pudo actualizar la solicitud.'));
+        this.errorMensaje.set(extraerMensajeError(error, 'No se pudo actualizar la solicitud.'));
       },
     });
   }
@@ -73,7 +73,7 @@ export class SolicitudesStore {
         this.cargando.set(false);
       },
       error: (error: HttpErrorResponse) => {
-        this.errorMensaje.set(this.extraerMensaje(error, 'No se pudieron cargar las solicitudes.'));
+        this.errorMensaje.set(extraerMensajeError(error, 'No se pudieron cargar las solicitudes.'));
         this.cargando.set(false);
       },
     });
@@ -107,11 +107,5 @@ export class SolicitudesStore {
     }
 
     this.solicitudes.set(this.cache.get(this.filtro()) ?? []);
-  }
-
-  private extraerMensaje(error: HttpErrorResponse, mensajePorDefecto: string): string {
-    const backendError = error.error as ErrorResponse | undefined;
-    const detalle = backendError?.errores?.length ? ` (${backendError.errores.join(', ')})` : '';
-    return (backendError?.mensaje ?? mensajePorDefecto) + detalle;
   }
 }
