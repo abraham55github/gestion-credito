@@ -1,6 +1,7 @@
 package com.gestion.credito.exception;
 
 import com.gestion.credito.auth.exception.CredencialesInvalidasException;
+import com.gestion.credito.auth.exception.UsuarioYaExisteException;
 import com.gestion.credito.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(TransicionEstadoInvalidaException.class)
     public ResponseEntity<ErrorResponse> manejarTransicionInvalida(TransicionEstadoInvalidaException ex) {
+        return construirRespuesta(HttpStatus.CONFLICT, ex.getMessage(), List.of());
+    }
+
+    @ExceptionHandler(UsuarioYaExisteException.class)
+    public ResponseEntity<ErrorResponse> manejarUsuarioExistente(UsuarioYaExisteException ex) {
         return construirRespuesta(HttpStatus.CONFLICT, ex.getMessage(), List.of());
     }
 

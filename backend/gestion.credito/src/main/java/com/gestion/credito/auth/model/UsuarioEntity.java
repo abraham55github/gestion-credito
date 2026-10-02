@@ -22,7 +22,7 @@ public class UsuarioEntity {
     @Column(nullable = false, length = 50)
     private String apellido;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, unique = true, length = 50)
     private String email;
 
     protected UsuarioEntity() {

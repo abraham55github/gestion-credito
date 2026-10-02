@@ -4,24 +4,34 @@ import com.gestion.credito.auth.dto.LoginRequest;
 import com.gestion.credito.auth.dto.RegisterRequest;
 import com.gestion.credito.auth.dto.UsuarioResponse;
 import com.gestion.credito.auth.exception.CredencialesInvalidasException;
+import com.gestion.credito.auth.exception.UsuarioYaExisteException;
 import com.gestion.credito.auth.model.UsuarioEntity;
 import com.gestion.credito.auth.repository.UsuarioRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
 
     private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthService(UsuarioRepository usuarioRepository) {
+    public AuthService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public UsuarioResponse registrar(RegisterRequest request) {
-        // constraseña en texto plano
+        if (usuarioRepository.existsByCedula(request.cedula())) {
+            throw UsuarioYaExisteException.porCedula(request.cedula());
+        }
+        if (usuarioRepository.existsByEmail(request.correo())) {
+            throw UsuarioYaExisteException.porEmail(request.correo());
+        }
+
         UsuarioEntity usuario = new UsuarioEntity(
                 request.cedula(),
-                request.password(),
+                passwordEncoder.encode(request.password()),
                 request.nombre(),
                 request.apellido(),
                 request.correo()
@@ -35,8 +45,7 @@ public class AuthService {
         UsuarioEntity usuario = usuarioRepository.findByEmail(request.correo())
                 .orElseThrow(CredencialesInvalidasException::new);
 
-        // comparacion en texto plano por ahora
-        if (!usuario.getPassword().equals(request.password())) {
+        if (!passwordEncoder.matches(request.password(), usuario.getPassword())) {
             throw new CredencialesInvalidasException();
         }
 
