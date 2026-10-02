@@ -10,6 +10,8 @@ Desplegado en un servidor propio (Oracle Cloud), corriendo desde la rama `main`:
 - **API:** http://158.247.127.230:8090/gestion-credito/api
 - **Swagger UI:** http://158.247.127.230:8090/gestion-credito/api/swagger-ui.html
 
+Corriendo contra la base PostgreSQL (RDS/Aurora) provista para la prueba técnica.
+
 ## Stack
 
 - **Backend:** Java 21, Spring Boot 4.1, Spring Data JPA, Bean Validation, Spring Security + JWT (jjwt), PostgreSQL, springdoc-openapi (Swagger).
@@ -22,10 +24,21 @@ Desplegado en un servidor propio (Oracle Cloud), corriendo desde la rama `main`:
 
 El `docker-compose.yml` es distinto según la rama, a propósito:
 
-- **`development`** (esta rama): self-contained — levanta su propio Postgres en un contenedor, no necesita nada externo ni ningún `.env`.
-- **`main`**: orientado a producción/demo real — el backend se conecta a una base PostgreSQL externa vía variables de entorno (`DB_URL`, `DB_USER`, `DB_PASSWORD`, `JWT_SECRET`) en un `.env` no versionado.
+- **`development`**: self-contained. Levanta su propio Postgres en un contenedor (perfil `docker` del backend) — pensado para desarrollo local, no necesita nada externo ni ningún `.env`.
+- **`main`**: orientado a producción/demo real. El backend corre con el perfil `prod` y se conecta a una base PostgreSQL **externa** (no levanta Postgres propio), vía las variables de entorno `DB_URL`, `DB_USER`, `DB_PASSWORD` y `JWT_SECRET`. Así se probó contra la base RDS/Aurora provista para esta prueba técnica.
 
-Desde la raíz del repositorio:
+Para `main`, hace falta un archivo `.env` en la raíz del repo — **no se versiona** (está en `.gitignore`, por eso no vas a encontrar credenciales reales en ningún archivo del repo). Docker Compose lo lee solo, sin flags adicionales. Formato:
+
+```bash
+DB_URL=jdbc:postgresql://<host>:5432/<base>?currentSchema=<schema>
+DB_USER=<usuario>
+DB_PASSWORD=<password>
+JWT_SECRET=<algo-largo-y-aleatorio>
+```
+
+El `?currentSchema=<schema>` es importante si la base es compartida (como la de esta prueba, donde cada candidato tiene su propio esquema aislado) — sin eso, Postgres intenta usar el esquema `public`, al que puede no tener permisos.
+
+Desde la raíz del repositorio, parado en la rama que corresponda:
 
 ```bash
 docker compose up --build
@@ -39,7 +52,7 @@ Cuando termine de levantar:
 
 El frontend le pega a la API a través de un reverse proxy de nginx (`frontend/gestionCredito/nginx.conf`), así que no hace falta configurar ninguna URL ni IP a mano.
 
-Para apagar todo: `docker compose down` (o `docker compose down -v` si además querés borrar los datos de Postgres).
+Para apagar todo: `docker compose down` (o `docker compose down -v` si además querés borrar los datos de Postgres, solo aplica en `development`).
 
 ### Opción B — Backend y frontend por separado (desarrollo)
 
@@ -138,7 +151,7 @@ Todas las respuestas de error comparten el mismo contrato JSON:
                            src/app/auth    -> login, registro, sesión, guard, interceptor
                            src/app/credit  -> solicitudes de crédito
                            src/app/shared  -> utilidades comunes a ambos
-docker-compose.yml         Levanta el stack con docker compose up --build (contenido distinto en main/development)
+docker-compose.yml         Levanta el stack con docker compose up --build (contenido distinto en main/development, ver sección Docker)
 ```
 
 ## Decisiones de diseño (resumen)
