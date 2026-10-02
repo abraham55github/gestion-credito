@@ -1,7 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { SolicitudCreditoService } from '../../services/solicitud-credito.service';
 import { SolicitudResponse } from '../../models/solicitud-response';
 import { EstadoSolicitud } from '../../models/estado-solicitud';
+import { ErrorResponse } from '../../models/error-response';
 import { SolicitudCard } from '../../components/solicitud-card/solicitud-card';
 
 type FiltroEstado = EstadoSolicitud | 'TODAS';
@@ -48,8 +50,8 @@ export default class SolicitudesPage {
         this.solicitudes.set(solicitudes);
         this.cargando.set(false);
       },
-      error: () => {
-        this.errorMensaje.set('No se pudieron cargar las solicitudes.');
+      error: (error: HttpErrorResponse) => {
+        this.errorMensaje.set(this.extraerMensaje(error, 'No se pudieron cargar las solicitudes.'));
         this.cargando.set(false);
       },
     });
@@ -65,9 +67,15 @@ export default class SolicitudesPage {
 
     this.solicitudCreditoService.cambiarEstado(solicitud.id, { estado, comentario }).subscribe({
       next: () => this.cargar(),
-      error: () => {
-        this.errorMensaje.set('No se pudo actualizar la solicitud.');
+      error: (error: HttpErrorResponse) => {
+        this.errorMensaje.set(this.extraerMensaje(error, 'No se pudo actualizar la solicitud.'));
       },
     });
+  }
+
+  private extraerMensaje(error: HttpErrorResponse, mensajePorDefecto: string): string {
+    const backendError = error.error as ErrorResponse | undefined;
+    const detalle = backendError?.errores?.length ? ` (${backendError.errores.join(', ')})` : '';
+    return (backendError?.mensaje ?? mensajePorDefecto) + detalle;
   }
 }
