@@ -55,4 +55,11 @@ public class AuthService {
 
         return new AuthResponse(jwtService.generarToken(usuario.getEmail()));
     }
+
+    public UsuarioResponse obtenerActual(String correo) {
+        UsuarioEntity usuario = usuarioRepository.findByEmail(correo)
+                .orElseThrow(CredencialesInvalidasException::new);
+
+        return UsuarioResponse.desde(usuario);
+    }
 }
