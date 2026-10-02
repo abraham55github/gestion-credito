@@ -1,7 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { SolicitudResponse } from '../../models/solicitud-response';
-import { EstadoSolicitud } from '../../models/estado-solicitud';
 import { SolicitudCard } from '../../components/solicitud-card/solicitud-card';
+import { CambioEstadoEvento } from '../../components/solicitud-card/solicitud-card-state/solicitud-card-state';
 import { FiltroEstado, SolicitudesStore } from '../../services/solicitudes-store';
 
 @Component({
@@ -27,22 +26,7 @@ export default class SolicitudesPage implements OnInit {
     this.store.cambiarFiltro(filtro);
   }
 
-  aprobar(solicitud: SolicitudResponse): void {
-    this.pedirComentarioYCambiarEstado(solicitud, 'APROBADA');
-  }
-
-  rechazar(solicitud: SolicitudResponse): void {
-    this.pedirComentarioYCambiarEstado(solicitud, 'RECHAZADA');
-  }
-
-  private pedirComentarioYCambiarEstado(solicitud: SolicitudResponse, estado: EstadoSolicitud): void {
-    const accion = estado === 'APROBADA' ? 'aprobar' : 'rechazar';
-    const comentario = window.prompt(`Comentario para ${accion} la solicitud de ${solicitud.cedula}:`);
-
-    if (!comentario || !comentario.trim()) {
-      return;
-    }
-
-    this.store.cambiarEstado(solicitud, estado, comentario);
+  cambiarEstado(evento: CambioEstadoEvento): void {
+    this.store.cambiarEstado(evento.solicitud, evento.estado, evento.comentario);
   }
 }

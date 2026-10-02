@@ -19,8 +19,7 @@
         @for (solicitud of solicitudes(); track solicitud.id) {
             <solicitud-card
                 [solicitud]="solicitud"
-                (aprobar)="aprobar($event)"
-                (rechazar)="rechazar($event)"
+                (cambiarEstado)="cambiarEstado($event)"
             />
         }
 

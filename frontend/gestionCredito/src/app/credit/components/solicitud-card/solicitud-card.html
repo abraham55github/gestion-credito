@@ -3,7 +3,6 @@
     <solicitud-card-info [solicitud]="solicitud()" />
     <solicitud-card-state
         [solicitud]="solicitud()"
-        (aprobar)="aprobar.emit($event)"
-        (rechazar)="rechazar.emit($event)"
+        (cambiarEstado)="cambiarEstado.emit($event)"
     />
 </article>
