@@ -19,4 +19,8 @@ export class AuthService {
   login(request: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.baseUrl}/login`, request);
   }
+
+  yo(): Observable<UsuarioResponse> {
+    return this.http.get<UsuarioResponse>(`${this.baseUrl}/me`);
+  }
 }

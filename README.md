@@ -4,7 +4,7 @@ Prueba técnica — Desarrollador Full Stack (BlueCore). Aplicación para crear 
 
 ## Demo en vivo
 
-Desplegado en un servidor propio (Oracle Cloud):
+Desplegado en un servidor propio (Oracle Cloud), corriendo desde la rama `main`:
 
 - **Frontend:** http://158.247.127.230
 - **API:** http://158.247.127.230:8090/gestion-credito/api
@@ -22,7 +22,7 @@ Corriendo contra la base PostgreSQL (RDS/Aurora) provista para la prueba técnic
 
 ### Opción A — Todo con Docker (recomendado)
 
-El `docker-compose.yml` es distinto según la rama — a propósito:
+El `docker-compose.yml` es distinto según la rama, a propósito:
 
 - **`development`**: self-contained. Levanta su propio Postgres en un contenedor (perfil `docker` del backend) — pensado para desarrollo local, no necesita nada externo ni ningún `.env`.
 - **`main`**: orientado a producción/demo real. El backend corre con el perfil `prod` y se conecta a una base PostgreSQL **externa** (no levanta Postgres propio), vía las variables de entorno `DB_URL`, `DB_USER`, `DB_PASSWORD` y `JWT_SECRET`. Así se probó contra la base RDS/Aurora provista para esta prueba técnica.
@@ -92,10 +92,11 @@ La API usa JWT. Hay que registrarse e iniciar sesión antes de poder usar los en
 1. `POST /auth/register` — crea el usuario (cédula, nombre, apellido, correo, contraseña).
 2. `POST /auth/login` — devuelve un token: `{ "token": "..." }`.
 3. Mandar ese token en cada request siguiente: header `Authorization: Bearer <token>`.
+4. `GET /auth/me` — devuelve los datos del usuario autenticado (cédula, nombre, apellido, correo), usado por el frontend para mostrar el nombre real en vez de un dato fijo.
 
 En Swagger UI hay un botón **"Authorize"** arriba a la derecha — pegás el token ahí (sin escribir `Bearer`) y las pruebas desde la UI ya lo mandan solas.
 
-El frontend maneja esto automáticamente: guarda el token al loguearse, lo adjunta a cada request, y redirige a `/login` si no hay sesión activa.
+El frontend maneja esto automáticamente: guarda el token y los datos del usuario al loguearse, los adjunta/muestra donde corresponde, y redirige a `/login` si no hay sesión activa.
 
 ## Casos de uso implementados
 
@@ -103,6 +104,7 @@ El frontend maneja esto automáticamente: guarda el token al loguearse, lo adjun
 | --- | --- | --- | --- |
 | `POST` | `/auth/register` | Crea un usuario nuevo | No |
 | `POST` | `/auth/login` | Devuelve un JWT | No |
+| `GET` | `/auth/me` | Datos del usuario autenticado | Sí |
 | `POST` | `/solicitudes` | Crea una solicitud de crédito (nace en estado `PENDIENTE`) | Sí |
 | `GET` | `/solicitudes?estado=` | Lista las solicitudes; el filtro por estado es opcional | Sí |
 | `PATCH` | `/solicitudes/{id}/estado` | Aprueba o rechaza una solicitud, con comentario obligatorio | Sí |
@@ -144,7 +146,7 @@ Todas las respuestas de error comparten el mismo contrato JSON:
 
 ```text
 /backend/gestion.credito   API en Spring Boot (controller -> service -> repository, DTOs separados de las entidades)
-                           com.gestion.credito.auth.*  -> registro, login, JWT, seguridad
+                           com.gestion.credito.auth.*  -> registro, login, /me, JWT, seguridad
 /frontend/gestionCredito   Angular (componentes standalone + signals)
                            src/app/auth    -> login, registro, sesión, guard, interceptor
                            src/app/credit  -> solicitudes de crédito
@@ -163,15 +165,15 @@ docker-compose.yml         Levanta el stack con docker compose up --build (conte
 - El id de `Usuario` es autogenerado; la **cédula** es el campo de negocio único (no se usa como clave primaria para no acoplar el esquema a un dato que en teoría podría cambiar de formato).
 - En el frontend, el estado de las solicitudes vive en un **store** (`SolicitudesStore`, signals) en vez de en cada página — sobrevive la navegación entre rutas y evita refetchear innecesariamente.
 - **`main` y `development` con `docker-compose.yml` distinto a propósito**: separar "entorno de desarrollo self-contained" de "entorno conectado a infraestructura real" evita que una credencial de producción termine en el flujo normal de desarrollo, y viceversa.
+- **Mobile**: sidebar fijo solo a partir de `lg:`; en pantallas chicas se reemplaza por una barra de navegación inferior con las mismas acciones (Solicitudes, Nueva solicitud, Cerrar sesión).
 
 ## Bonus implementados
 
 - ✅ Angular en el frontend.
-- ✅ Dockerización completa (`docker compose up` funcional).
-- ✅ Autenticación JWT (registro, login, endpoints de solicitudes protegidos).
+- ✅ Dockerización completa (`docker compose up` funcional, probado tanto self-contained como contra una base PostgreSQL real).
+- ✅ Autenticación JWT (registro, login, `/auth/me`, endpoints de solicitudes protegidos).
 
 ## Pendiente / conocido
 
-- **Vista mobile**: el sidebar (`credit-side-menu`) es de ancho fijo sin breakpoints — en pantallas chicas ocupa la mayoría del ancho y no hay un menú alternativo (tipo tabs inferiores). Es lo próximo a resolver.
-- El nombre mostrado en el sidebar está hardcodeado — el login solo devuelve el token, no los datos del usuario (haría falta un endpoint `/auth/me` o decodificar el JWT en el cliente).
 - Sin tests automatizados en el frontend (el backend sí cumple el mínimo pedido por el enunciado).
+- Sin refresh token — decisión consciente, fuera del alcance pedido ("JWT básica").
