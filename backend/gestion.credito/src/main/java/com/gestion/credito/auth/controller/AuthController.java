@@ -1,5 +1,6 @@
 package com.gestion.credito.auth.controller;
 
+import com.gestion.credito.auth.dto.LoginRequest;
 import com.gestion.credito.auth.dto.RegisterRequest;
 import com.gestion.credito.auth.dto.UsuarioResponse;
 import com.gestion.credito.auth.service.AuthService;
@@ -24,5 +25,10 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<UsuarioResponse> registrar(@Valid @RequestBody RegisterRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.registrar(request));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<UsuarioResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 }
