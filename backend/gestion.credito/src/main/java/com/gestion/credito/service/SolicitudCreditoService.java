@@ -3,6 +3,8 @@ package com.gestion.credito.service;
 import com.gestion.credito.dto.CambiarEstadoRequest;
 import com.gestion.credito.dto.CrearSolicitudRequest;
 import com.gestion.credito.dto.SolicitudResponse;
+import com.gestion.credito.exception.SolicitudNotFoundException;
+import com.gestion.credito.exception.TransicionEstadoInvalidaException;
 import com.gestion.credito.model.EstadoSolicitud;
 import com.gestion.credito.model.SolicitudCredito;
 import com.gestion.credito.repository.SolicitudCreditoRepository;
@@ -37,13 +39,15 @@ public class SolicitudCreditoService {
     }
 
     public SolicitudResponse cambiarEstado(Long id, CambiarEstadoRequest request) {
-        SolicitudCredito solicitud = repository.findById(id).orElseThrow();
+        SolicitudCredito solicitud = repository.findById(id)
+                .orElseThrow(() -> new SolicitudNotFoundException(id));
+
+        if (solicitud.getEstadoSolicitud() != EstadoSolicitud.PENDIENTE) {
+            throw new TransicionEstadoInvalidaException(solicitud.getEstadoSolicitud(), request.estado());
+        }
 
         solicitud.cambiarEstado(request.estado(), request.comentario());
         solicitud = repository.save(solicitud);
         return SolicitudResponse.desde(solicitud);
     }
-
-
-
 }
