@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
+import { switchMap } from 'rxjs';
 import { Router, RouterLink } from '@angular/router';
 import { AuthCard } from '../../components/auth-card/auth-card';
 import { AuthService } from '../../services/auth.service';
@@ -37,9 +38,14 @@ export class LoginPage {
     }
 
     this.ingresando.set(true);
-    this.authService.login(this.loginForm.getRawValue()).subscribe({
-      next: ({ token }) => {
+    this.authService.login(this.loginForm.getRawValue()).pipe(
+      switchMap(({ token }) => {
         this.session.guardarToken(token);
+        return this.authService.yo();
+      }),
+    ).subscribe({
+      next: (usuario) => {
+        this.session.guardarUsuario(usuario);
         this.router.navigateByUrl('/dashboard/solicitudes');
       },
       error: (error: HttpErrorResponse) => {
