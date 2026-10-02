@@ -20,7 +20,7 @@ docker compose up --build
 
 Esto levanta 3 contenedores (Postgres, backend, frontend) conectados entre sí. Cuando termine de levantar:
 
-- **Frontend:** http://localhost
+- **Frontend:** http://localhost:8081
 - **Backend / API:** http://localhost:8090/gestion-credito/api
 - **Swagger UI:** http://localhost:8090/gestion-credito/api/swagger-ui.html
 
