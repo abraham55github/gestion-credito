@@ -1,5 +1,6 @@
 package com.gestion.credito.auth.service;
 
+import com.gestion.credito.auth.dto.AuthResponse;
 import com.gestion.credito.auth.dto.LoginRequest;
 import com.gestion.credito.auth.dto.RegisterRequest;
 import com.gestion.credito.auth.dto.UsuarioResponse;
@@ -7,6 +8,7 @@ import com.gestion.credito.auth.exception.CredencialesInvalidasException;
 import com.gestion.credito.auth.exception.UsuarioYaExisteException;
 import com.gestion.credito.auth.model.UsuarioEntity;
 import com.gestion.credito.auth.repository.UsuarioRepository;
+import com.gestion.credito.auth.security.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,10 +17,12 @@ public class AuthService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public AuthService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    public AuthService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     public UsuarioResponse registrar(RegisterRequest request) {
@@ -41,7 +45,7 @@ public class AuthService {
         return UsuarioResponse.desde(guardado);
     }
 
-    public UsuarioResponse login(LoginRequest request) {
+    public AuthResponse login(LoginRequest request) {
         UsuarioEntity usuario = usuarioRepository.findByEmail(request.correo())
                 .orElseThrow(CredencialesInvalidasException::new);
 
@@ -49,6 +53,6 @@ public class AuthService {
             throw new CredencialesInvalidasException();
         }
 
-        return UsuarioResponse.desde(usuario);
+        return new AuthResponse(jwtService.generarToken(usuario.getEmail()));
     }
 }
