@@ -29,11 +29,16 @@
             }
         </div>
 
+        @if (errorMensaje()) {
+            <p class="rounded-lg bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">{{ errorMensaje() }}</p>
+        }
+
         <button
             type="submit"
-            class="mt-2 h-11 rounded-lg bg-blue-600 text-sm font-bold text-white transition hover:bg-blue-700"
+            [disabled]="ingresando()"
+            class="mt-2 h-11 rounded-lg bg-blue-600 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-            Iniciar sesión
+            {{ ingresando() ? 'Ingresando...' : 'Iniciar sesión' }}
         </button>
 
         <p class="text-center text-xs text-slate-500">
