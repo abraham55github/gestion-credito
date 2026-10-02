@@ -3,5 +3,6 @@ export const environment = {
     companyName: 'Blue',
     companyName2: 'Core',
     companySlogan: 'Solicitudes de credito',
-    apiUrl: 'http://localhost:8090/gestion-credito/api',
+    // Ruta relativa: nginx (ver nginx.conf) la reenvía al backend dentro de la red de Docker.
+    apiUrl: '/gestion-credito/api',
 };
