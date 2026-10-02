@@ -5,7 +5,7 @@ import { SolicitudCard } from '../../components/solicitud-card/solicitud-card';
 import { FiltroEstado, SolicitudesStore } from '../../services/solicitudes-store';
 
 @Component({
-  selector: 'app-solicitudes-page',
+  selector: 'solicitudes-page',
   imports: [SolicitudCard],
   templateUrl: './solicitudes-page.html'
 })

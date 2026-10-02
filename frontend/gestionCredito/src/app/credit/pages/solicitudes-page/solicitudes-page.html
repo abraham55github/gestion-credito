@@ -17,7 +17,7 @@
 
     <div class="mt-5 flex flex-col gap-3">
         @for (solicitud of solicitudes(); track solicitud.id) {
-            <app-solicitud-card
+            <solicitud-card
                 [solicitud]="solicitud"
                 (aprobar)="aprobar($event)"
                 (rechazar)="rechazar($event)"
