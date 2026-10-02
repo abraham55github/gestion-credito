@@ -1,7 +1,10 @@
 import { Component, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Router, RouterLink } from '@angular/router';
 import { AuthCard } from '../../components/auth-card/auth-card';
+import { AuthService } from '../../services/auth.service';
+import { extraerMensajeError } from '../../../shared/utils/extraer-mensaje-error';
 
 function contrasenasIguales(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
@@ -16,6 +19,8 @@ function contrasenasIguales(control: AbstractControl): ValidationErrors | null {
 })
 export class RegisterPage {
   private readonly formBuilder = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   readonly registerForm = this.formBuilder.nonNullable.group({
     nombre: ['', [Validators.required]],
@@ -27,20 +32,27 @@ export class RegisterPage {
   }, { validators: contrasenasIguales });
 
   readonly enviado = signal(false);
-  readonly exito = signal(false);
+  readonly guardando = signal(false);
+  readonly errorMensaje = signal('');
 
   onSubmit(): void {
     this.enviado.set(true);
+    this.errorMensaje.set('');
 
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
       return;
     }
 
-    // Mock: todavía no existe el backend de autenticación.
-    // Cuando exista, esto pasa a ser una llamada a un AuthService real (mismo patrón que SolicitudesStore).
+    this.guardando.set(true);
     const { confirmPassword, ...request } = this.registerForm.getRawValue();
-    console.log('Registro (mock):', request);
-    this.exito.set(true);
+
+    this.authService.registrar(request).subscribe({
+      next: () => this.router.navigateByUrl('/login'),
+      error: (error: HttpErrorResponse) => {
+        this.guardando.set(false);
+        this.errorMensaje.set(extraerMensajeError(error, 'No se pudo crear la cuenta. Intenta nuevamente.'));
+      },
+    });
   }
 }
