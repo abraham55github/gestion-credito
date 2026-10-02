@@ -2,6 +2,16 @@
 
 Prueba técnica — Desarrollador Full Stack (BlueCore). Aplicación para crear solicitudes de crédito, aprobarlas/rechazarlas y visualizar su estado, con autenticación de usuarios.
 
+## Demo en vivo
+
+Desplegado en un servidor propio (Oracle Cloud):
+
+- **Frontend:** http://158.247.127.230
+- **API:** http://158.247.127.230:8090/gestion-credito/api
+- **Swagger UI:** http://158.247.127.230:8090/gestion-credito/api/swagger-ui.html
+
+Corriendo contra la base PostgreSQL (RDS/Aurora) provista para la prueba técnica.
+
 ## Stack
 
 - **Backend:** Java 21, Spring Boot 4.1, Spring Data JPA, Bean Validation, Spring Security + JWT (jjwt), PostgreSQL, springdoc-openapi (Swagger).
@@ -12,10 +22,21 @@ Prueba técnica — Desarrollador Full Stack (BlueCore). Aplicación para crear 
 
 ### Opción A — Todo con Docker (recomendado)
 
-El `docker-compose.yml` es distinto según la rama:
+El `docker-compose.yml` es distinto según la rama — a propósito:
 
-- **`development`**: self-contained — levanta su propio Postgres en un contenedor, no necesita nada externo.
-- **`main`**: pensado para producción — el backend se conecta a una base PostgreSQL externa (no levanta Postgres propio), usando las variables de entorno `DB_URL`, `DB_USER`, `DB_PASSWORD` y `JWT_SECRET`. Hace falta un archivo `.env` en la raíz del repo (no versionado) con esos 4 valores — Docker Compose lo lee solo, sin flags adicionales.
+- **`development`**: self-contained. Levanta su propio Postgres en un contenedor (perfil `docker` del backend) — pensado para desarrollo local, no necesita nada externo ni ningún `.env`.
+- **`main`**: orientado a producción/demo real. El backend corre con el perfil `prod` y se conecta a una base PostgreSQL **externa** (no levanta Postgres propio), vía las variables de entorno `DB_URL`, `DB_USER`, `DB_PASSWORD` y `JWT_SECRET`. Así se probó contra la base RDS/Aurora provista para esta prueba técnica.
+
+Para `main`, hace falta un archivo `.env` en la raíz del repo — **no se versiona** (está en `.gitignore`, por eso no vas a encontrar credenciales reales en ningún archivo del repo). Docker Compose lo lee solo, sin flags adicionales. Formato:
+
+```bash
+DB_URL=jdbc:postgresql://<host>:5432/<base>?currentSchema=<schema>
+DB_USER=<usuario>
+DB_PASSWORD=<password>
+JWT_SECRET=<algo-largo-y-aleatorio>
+```
+
+El `?currentSchema=<schema>` es importante si la base es compartida (como la de esta prueba, donde cada candidato tiene su propio esquema aislado) — sin eso, Postgres intenta usar el esquema `public`, al que puede no tener permisos.
 
 Desde la raíz del repositorio, parado en la rama que corresponda:
 
@@ -128,7 +149,7 @@ Todas las respuestas de error comparten el mismo contrato JSON:
                            src/app/auth    -> login, registro, sesión, guard, interceptor
                            src/app/credit  -> solicitudes de crédito
                            src/app/shared  -> utilidades comunes a ambos
-docker-compose.yml         Levanta todo el stack (Postgres + backend + frontend) para la entrega
+docker-compose.yml         Levanta el stack con docker compose up --build (contenido distinto en main/development, ver sección Docker)
 ```
 
 ## Decisiones de diseño (resumen)
@@ -141,6 +162,7 @@ docker-compose.yml         Levanta todo el stack (Postgres + backend + frontend)
 - **JWT stateless**: sin sesiones ni refresh token — se consideró innecesario para el alcance pedido ("JWT básica: login + token"); si el token expira, el usuario vuelve a loguearse.
 - El id de `Usuario` es autogenerado; la **cédula** es el campo de negocio único (no se usa como clave primaria para no acoplar el esquema a un dato que en teoría podría cambiar de formato).
 - En el frontend, el estado de las solicitudes vive en un **store** (`SolicitudesStore`, signals) en vez de en cada página — sobrevive la navegación entre rutas y evita refetchear innecesariamente.
+- **`main` y `development` con `docker-compose.yml` distinto a propósito**: separar "entorno de desarrollo self-contained" de "entorno conectado a infraestructura real" evita que una credencial de producción termine en el flujo normal de desarrollo, y viceversa.
 
 ## Bonus implementados
 
